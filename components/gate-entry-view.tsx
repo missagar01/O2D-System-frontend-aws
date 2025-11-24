@@ -222,29 +222,34 @@ export function GateEntryView() {
             </div>
           </div>
         </div>
-        <div className="overflow-x-auto mobile-card-view" style={{ maxHeight: '450px', overflowY: 'auto' }}>
-  {/* Desktop Table View */}
-  <table className="w-full hidden md:table">
-    <thead className="bg-gray-50 border-b">
+        <div
+          className="overflow-x-auto mobile-card-view relative"
+          style={{ maxHeight: '400px', overflowY: 'auto' }}
+        >
+  <table className="w-full table-auto text-sm">
+    <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
       <tr>
-        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Entry Number</th>
-        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
-        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
-        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+        <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Timestamp</th>
+        <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Order Number</th>
+        <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Gate Entry Number</th>
+        <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Customer Name</th>
+        <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Truck Number</th>
+        <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
       </tr>
     </thead>
     <tbody className="divide-y divide-gray-200">
       {filteredData.length > 0 ? (
         filteredData.map((entry, index) => (
-          <tr key={entry.gateEntryNumber || index} className="hover:bg-gray-50">
-            <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.timestamp}</td>
-            <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.orderNumber}</td>
-            <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.gateEntryNumber}</td>
-            <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.customerName}</td>
-            <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.truckNumber}</td>
-            <td className="px-6 py-4 whitespace-nowrap">
+          <tr
+            key={`${entry.gateEntryNumber || entry.orderNumber || "gate-entry"}-${index}`}
+            className="hover:bg-gray-50"
+          >
+            <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.timestamp}</td>
+            <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{entry.orderNumber}</td>
+            <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.gateEntryNumber}</td>
+            <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.customerName}</td>
+            <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.truckNumber}</td>
+            <td className="px-4 py-3 whitespace-nowrap">
               <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
                 {entry.status}
               </span>
@@ -260,48 +265,6 @@ export function GateEntryView() {
       )}
     </tbody>
   </table>
-
-  {/* Mobile Card View */}
-  <div className="md:hidden">
-    {filteredData.length > 0 ? (
-      filteredData.map((entry, index) => (
-        <div key={entry.gateEntryNumber || index} className="mobile-card">
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Timestamp:</span>
-            <span className="mobile-card-value">{entry.timestamp}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Order Number:</span>
-            <span className="mobile-card-value">{entry.orderNumber}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Gate Entry Number:</span>
-            <span className="mobile-card-value">{entry.gateEntryNumber}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Customer Name:</span>
-            <span className="mobile-card-value">{entry.customerName}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Truck Number:</span>
-            <span className="mobile-card-value">{entry.truckNumber}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Status:</span>
-            <span className="mobile-card-value">
-              <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
-                {entry.status}
-              </span>
-            </span>
-          </div>
-        </div>
-      ))
-    ) : (
-      <div className="px-6 py-8 text-center text-gray-500">
-        No matching records found
-      </div>
-    )}
-  </div>
 </div>
       </div>
     </div>

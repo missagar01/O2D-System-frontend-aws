@@ -58,8 +58,6 @@ const [items, setItems] = useState([])
       }
       const result = await response.json()
 
-      console.log("Received data from Google Sheets:", result)
-
       if (result.success && result.data) {
         const processedData = processSheetData(result.data)
         setData(processedData)
@@ -87,7 +85,6 @@ const fetchItemsFromFMSSheet = async () => {
     
     if (result.success && result.data) {
       const itemsSet = new Set()
-      console.log("Fetched data for items:", result.data)
       
       // Start from row 7 (index 6) as header is in row 6 (index 5)
       result.data.slice(6).forEach((row) => {
@@ -101,7 +98,6 @@ const fetchItemsFromFMSSheet = async () => {
       })
       
       const itemsArray = Array.from(itemsSet).sort()
-      console.log("Extracted items:", itemsArray)
       setItems(itemsArray)
     }
   } catch (error) {
@@ -110,16 +106,12 @@ const fetchItemsFromFMSSheet = async () => {
 }
 
   const processSheetData = (sheetData) => {
-    console.log("Processing sheet data:", sheetData)
-
     if (!Array.isArray(sheetData) || sheetData.length === 0) {
       throw new Error("No data rows found in the response")
     }
 
     // Start from row 7 (index 6) as header is in row 6 (index 5)
     const actualDataRows = sheetData.slice(6)
-
-    console.log("Processing", actualDataRows.length, "data rows after skipping headers")
 
     const processedData = {
       rawData: actualDataRows,
@@ -156,10 +148,6 @@ const fetchItemsFromFMSSheet = async () => {
     processedData.uniqueStates = Array.from(statesSet).sort()
     processedData.uniqueSalespersons = Array.from(salespersonsSet).sort()
 
-    console.log("Unique parties:", processedData.uniqueParties.length)
-    console.log("Unique states:", processedData.uniqueStates.length)
-    console.log("Unique salespersons:", processedData.uniqueSalespersons.length)
-
     return processedData
   }
 
@@ -168,8 +156,6 @@ const fetchItemsFromFMSSheet = async () => {
     if (!dateTimeStr) return null
 
     const str = dateTimeStr.toString().trim()
-    console.log("Parsing date:", str)
-
     // Handle different date formats
     // Format 1: "19-08-2025 11:08:40" or "19/08/2025 11:08:40"
     // Format 2: "19-08-2025" or "19/08/2025"
@@ -207,11 +193,9 @@ const fetchItemsFromFMSSheet = async () => {
       }
 
       const parsedDate = new Date(year, month, day)
-      console.log("Parsed date:", parsedDate)
       return parsedDate
     }
 
-    console.log("Could not parse date:", str)
     return null
   }
 
@@ -240,14 +224,6 @@ const isDateInRange = (dateStr, fromDate, toDate) => {
       isInRange = false
     }
   }
-
-    console.log("Date check:", {
-      original: dateStr,
-      parsed: rowDateOnly,
-      fromDate: fromDate,
-      toDate: toDate,
-      inRange: isInRange,
-    })
 
     return isInRange
   }
@@ -380,7 +356,7 @@ const calculateFilteredMetrics = () => {
         metrics.pendingPayments += parseFloat(row[38])
       }
     } catch (error) {
-      console.log(`Error processing row ${index + 7}:`, error, "Row data:", row)
+      console.error(`Error processing row ${index + 7}:`, error)
     }
   })
 
@@ -1298,40 +1274,42 @@ const generateTop10Customers = () => {
                 color: "#0088FE",
               },
             }}
-            className="h-[300px] sm:h-[350px] lg:h-[400px] w-full"
+            className="w-full"
           >
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={generateChartData().length > 0 ? generateChartData() : []}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius="60%"
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {generateChartData().map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <ChartTooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const data = payload[0].payload
-                      return (
-                        <div className="bg-white border rounded-lg p-2 shadow-md">
-                          <p className="font-medium">{data.name}</p>
-                          <p className="text-sm text-gray-600">{data.value} dispatches</p>
-                        </div>
-                      )
-                    }
-                    return null
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="w-full" style={{ minHeight: 300 }}>
+              <ResponsiveContainer width="100%" aspect={2.5}>
+                <PieChart>
+                  <Pie
+                    data={generateChartData().length > 0 ? generateChartData() : []}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius="60%"
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {generateChartData().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload
+                        return (
+                          <div className="bg-white border rounded-lg p-2 shadow-md">
+                            <p className="font-medium">{data.name}</p>
+                            <p className="text-sm text-gray-600">{data.value} dispatches</p>
+                          </div>
+                        )
+                      }
+                      return null
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </ChartContainer>
         </CardContent>
       </Card>
@@ -1345,9 +1323,9 @@ const generateTop10Customers = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[420px]">
             <Table>
-             <TableHeader>
+             <TableHeader className="sticky top-0 z-10 bg-white">
   <TableRow>
     <TableHead className="text-xs sm:text-sm">Rank</TableHead>
     <TableHead className="text-xs sm:text-sm">Customer Name</TableHead>
@@ -1393,9 +1371,9 @@ const generateTop10Customers = () => {
     </CardDescription>
   </CardHeader>
   <CardContent>
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto max-h-[480px]">
       <Table>
-        <TableHeader>
+        <TableHeader className="sticky top-0 z-10 bg-white">
           <TableRow>
             <TableHead className="text-xs sm:text-sm">Sr. No.</TableHead>
             <TableHead className="text-xs sm:text-sm">Party Name</TableHead>

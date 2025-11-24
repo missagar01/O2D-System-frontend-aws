@@ -1,25 +1,21 @@
 "use client"
 
 import type React from "react"
+import Link from "next/link"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { LogIn } from "lucide-react"
+import { useAuth } from "./auth-context"
 
-interface LoginFormProps {
-  onLogin: (userAccess: string[]) => void
-}
-
-export function LoginForm({ onLogin }: LoginFormProps) {
+export function LoginForm() {
+  const { login } = useAuth()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-
-  const GOOGLE_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbxGzl1EP1Vc6C5hB4DyOpmxraeUc0Ar4mAw567VOKlaBk0qwdFxyB37cgiGNiKYXww7/exec"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,76 +23,12 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     setError("")
 
     try {
-      // Fetch data from Google Apps Script URL
-      const response = await fetch(`${GOOGLE_SCRIPT_URL}?sheet=Login`, {
-        method: "GET",
-      })
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok")
+      const access = await login(username, password)
+      if (!access.length) {
+        setError("No access configured for this user.")
       }
-
-      const result = await response.json()
-      console.log("Response from server:", result) // Debug log
-
-      // Handle different response formats
-      let data = result
-      if (result.data) {
-        data = result.data
-      } else if (result.values) {
-        data = result.values
-      }
-
-      // Ensure data is an array
-      if (!Array.isArray(data)) {
-        console.error("Data is not an array:", data)
-        setError("Invalid response format from server")
-        return
-      }
-
-      // Find matching user in the fetched data
-      const user = data.find((row: any[]) => row && row[0] === username && row[1] === password)
-
-      if (user) {
-        // Parse access permissions from column C
-        let userAccess: string[] = []
-        const accessString = user[2] ? String(user[2]).toLowerCase().trim() : ""
-
-        if (accessString === "all") {
-          // If access is "all", grant access to all pages
-          userAccess = [
-            "dashboard",
-            "orders",
-            "gate-entry",
-            "first-weight",
-            "load-vehicle",
-            "second-weight",
-            "generate-invoice",
-            "gate-out",
-            "payment",
-            "complaint-details",
-            "party-feedback"
-          ]
-        } else if (accessString) {
-          // ✅ FIXED: Parse comma-separated values WITHOUT automatically adding dashboard
-          userAccess = accessString
-            .split(",")
-            .map((item: string) => item.trim())
-            .filter((item) => item.length > 0)
-          // ✅ REMOVED: No longer automatically adding dashboard
-        } else {
-          // ✅ FIXED: If no access specified, give empty array (no access)
-          userAccess = []
-        }
-
-        console.log("🔑 User access granted:", userAccess) // Debug log
-        onLogin(userAccess)
-      } else {
-        setError("Invalid username or password")
-      }
-    } catch (error) {
-      console.error("Login error:", error)
-      setError("Failed to connect to authentication server. Please try again.")
+    } catch (err: any) {
+      setError(err?.message || "Failed to connect to authentication server. Please try again.")
     } finally {
       setIsLoading(false)
     }

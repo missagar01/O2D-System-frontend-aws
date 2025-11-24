@@ -71,7 +71,6 @@ const [selectedItems, setSelectedItems] = useState([]);
         setQualityControllerOptions(uniqueQualityControllers)
       }
     } catch (err) {
-      console.error("Error fetching supervisor names:", err)
       // Fallback to hardcoded options if fetch fails
       setSupervisorOptions(["John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson"])
       setItemOptions(["Item 1", "Item 2", "Item 3"])
@@ -351,30 +350,36 @@ const handleLoadVehicle = async () => {
               <h3 className="text-lg font-semibold">Pending Loading</h3>
               <p className="text-gray-600 text-sm">Vehicles waiting for loading</p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b">
+            <div
+              className="overflow-x-auto relative"
+              style={{ maxHeight: '600px', overflowY: 'auto' }}
+            >
+              <table className="w-full table-auto text-sm">
+                <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Entry Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Planned</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Order Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Gate Entry Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Customer Name</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Truck Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Item Name</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Planned</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {pendingData.length > 0 ? (
                     pendingData.map((entry, index) => (
-                      <tr key={entry.gateEntryNumber || index} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.orderNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.gateEntryNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.customerName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.truckNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.itemName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.planned3}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                      <tr
+                        key={`${entry.gateEntryNumber || 'gate'}-${entry.orderNumber || 'order'}-${entry.rowIndex || index}`}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{entry.orderNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.gateEntryNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.customerName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.truckNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.itemName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.planned3}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <button
                             onClick={() => openDialog(entry)}
                             className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
@@ -386,7 +391,7 @@ const handleLoadVehicle = async () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                      <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                         No pending records found
                       </td>
                     </tr>
@@ -404,34 +409,40 @@ const handleLoadVehicle = async () => {
               <h3 className="text-lg font-semibold">Loading History</h3>
               <p className="text-gray-600 text-sm">Completed loading records</p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b">
+            <div
+              className="overflow-x-auto relative"
+              style={{ maxHeight: '450px', overflowY: 'auto' }}
+            >
+              <table className="w-full table-auto text-sm">
+                <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Entry Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">WB Slip No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supervisor Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Order Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Gate Entry Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Customer Name</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Truck Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">WB Slip No</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Supervisor Name</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Remarks</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {historyData.length > 0 ? (
                     historyData.map((entry, index) => (
-                      <tr key={entry.gateEntryNumber || index} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.orderNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.gateEntryNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.customerName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.truckNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                      <tr
+                        key={`${entry.gateEntryNumber || 'gate'}-${entry.orderNumber || 'order'}-${entry.rowIndex || index}`}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{entry.orderNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.gateEntryNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.customerName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.truckNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                             {entry.wbSlipNo}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.supervisorName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap max-w-xs truncate text-gray-900">{entry.remarks}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.supervisorName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap max-w-xs truncate text-gray-900 text-xs sm:text-sm">{entry.remarks}</td>
                       </tr>
                     ))
                   ) : (

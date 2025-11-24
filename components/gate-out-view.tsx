@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from 'react'
+import { API_BASE_URL } from "../config/api";
 
 export function GateOutView() {
   const [pendingData, setPendingData] = useState([])
@@ -18,10 +19,6 @@ export function GateOutView() {
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const scrollContainerRef = useRef(null);
 
-  // const API_BASE_URL = "http://localhost:3005";
-  const API_BASE_URL = "https://o2d-backend-2.onrender.com"; // your backend URL
-
-
   // ✅ Fetch all unique customers on component mount
   useEffect(() => {
     fetchAllCustomers();
@@ -36,7 +33,6 @@ export function GateOutView() {
         setAllCustomers(result.data.filter(name => name).sort());
       }
     } catch (error) {
-      console.error('Error fetching customers:', error);
     }
   };
 
@@ -146,8 +142,6 @@ export function GateOutView() {
         }
 
         const url = `${API_BASE_URL}/gate-out/pending?${params.toString()}`;
-        console.log('Fetching pending data from:', url); // Debug log
-        
         const res = await fetch(url);
         
         const contentType = res.headers.get('content-type');
@@ -157,8 +151,6 @@ export function GateOutView() {
         }
 
         const result = await res.json();
-        console.log('Pending API response:', result); // Debug log
-
         if (result.success && Array.isArray(result.data)) {
           const pending = result.data.map(item => ({
             orderNumber: item.ORDER_VRNO || "",
@@ -216,8 +208,6 @@ export function GateOutView() {
         }
 
         const url = `${API_BASE_URL}/gate-out/history?${params.toString()}`;
-        console.log('Fetching history data from:', url); // Debug log
-        
         const res = await fetch(url);
         
         const contentType = res.headers.get('content-type');
@@ -227,8 +217,6 @@ export function GateOutView() {
         }
 
         const result = await res.json();
-        console.log('History API response:', result); // Debug log
-
         if (result.success && Array.isArray(result.data)) {
           const history = result.data.map(item => ({
             orderNumber: item.ORDER_VRNO || "",
@@ -268,7 +256,6 @@ export function GateOutView() {
       }
     } catch (err) {
       setError("Error fetching data: " + err.message);
-      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -419,19 +406,19 @@ export function GateOutView() {
             </div>
             <div
               ref={scrollContainerRef}
-              className="overflow-x-auto mobile-card-view"
-              style={{ maxHeight: '350px', overflowY: 'auto' }}
+              className="overflow-x-auto relative"
+              style={{ maxHeight: '500px', overflowY: 'auto' }}
             >
-              <table className="w-full hidden md:table">
-                <thead className="bg-gray-50 border-b">
+              <table className="w-full table-auto text-sm">
+                <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Planned Time</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Entry</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entry Date</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Planned Time</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Order Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Gate Entry</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Customer</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Truck Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Invoice Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Entry Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -448,17 +435,17 @@ export function GateOutView() {
                   {pendingData.length > 0 ? (
                     pendingData.map((entry, index) => (
                       <tr key={`${entry.gateEntryNumber}-${index}`} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.plannedFormatted}</td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.orderNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.gateEntryNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.customerName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.truckNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.plannedFormatted}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{entry.orderNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.gateEntryNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.customerName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.truckNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
                             {entry.invoiceNumber}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.vRDateFormatted}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.vRDateFormatted}</td>
                       </tr>
                     ))
                   ) : (
@@ -470,52 +457,6 @@ export function GateOutView() {
                   )}
                 </tbody>
               </table>
-
-              {/* Mobile Card View remains the same */}
-              <div className="md:hidden">
-                {pendingData.length > 0 ? (
-                  pendingData.map((entry, index) => (
-                    <div key={`${entry.gateEntryNumber}-${index}`} className="mobile-card">
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Planned Time:</span>
-                        <span className="mobile-card-value">{entry.plannedFormatted}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Order Number:</span>
-                        <span className="mobile-card-value">{entry.orderNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Gate Entry:</span>
-                        <span className="mobile-card-value">{entry.gateEntryNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Customer:</span>
-                        <span className="mobile-card-value">{entry.customerName}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Truck Number:</span>
-                        <span className="mobile-card-value">{entry.truckNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Invoice Number:</span>
-                        <span className="mobile-card-value">
-                          <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
-                            {entry.invoiceNumber}
-                          </span>
-                        </span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Entry Date:</span>
-                        <span className="mobile-card-value">{entry.vRDateFormatted}</span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-6 py-8 text-center text-gray-500">
-                    {customerFilter || searchTerm ? 'No records found for current filters' : 'No pending records found'}
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         )}
@@ -532,20 +473,20 @@ export function GateOutView() {
             </div>
             <div
               ref={scrollContainerRef}
-              className="overflow-x-auto mobile-card-view"
-              style={{ maxHeight: '350px', overflowY: 'auto' }}
+              className="overflow-x-auto relative"
+              style={{ maxHeight: '500px', overflowY: 'auto' }}
             >
-              <table className="w-full hidden md:table">
-                <thead className="bg-gray-50 border-b">
+              <table className="w-full table-auto text-sm">
+                <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Entry</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">WB Slip No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Out Time</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Order Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Gate Entry</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Customer</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Truck Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">WB Slip No</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Invoice Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Gate Out Time</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -562,22 +503,22 @@ export function GateOutView() {
                   {historyData.length > 0 ? (
                     historyData.map((entry, index) => (
                       <tr key={`${entry.gateEntryNumber}-${index}`} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.orderNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.gateEntryNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.customerName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.truckNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{entry.orderNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.gateEntryNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.customerName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.truckNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                             {entry.wbSlipNo}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
                             {entry.invoiceNumber}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.outDateFormatted}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.outDateFormatted}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
                             {entry.status}
                           </span>
@@ -593,64 +534,6 @@ export function GateOutView() {
                   )}
                 </tbody>
               </table>
-
-              {/* Mobile Card View remains the same */}
-              <div className="md:hidden">
-                {historyData.length > 0 ? (
-                  historyData.map((entry, index) => (
-                    <div key={`${entry.gateEntryNumber}-${index}`} className="mobile-card">
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Order Number:</span>
-                        <span className="mobile-card-value">{entry.orderNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Gate Entry:</span>
-                        <span className="mobile-card-value">{entry.gateEntryNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Customer:</span>
-                        <span className="mobile-card-value">{entry.customerName}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Truck Number:</span>
-                        <span className="mobile-card-value">{entry.truckNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">WB Slip No:</span>
-                        <span className="mobile-card-value">
-                          <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                            {entry.wbSlipNo}
-                          </span>
-                        </span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Invoice Number:</span>
-                        <span className="mobile-card-value">
-                          <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
-                            {entry.invoiceNumber}
-                          </span>
-                        </span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Gate Out Time:</span>
-                        <span className="mobile-card-value">{entry.outDateFormatted}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Status:</span>
-                        <span className="mobile-card-value">
-                          <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                            {entry.status}
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-6 py-8 text-center text-gray-500">
-                    {customerFilter || searchTerm ? 'No records found for current filters' : 'No history records found'}
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         )}

@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from 'react'
+import { API_BASE_URL } from "../config/api";
 
 export function GenerateInvoiceView() {
   const [pendingData, setPendingData] = useState([])
@@ -18,10 +19,6 @@ export function GenerateInvoiceView() {
   const [hasMoreHistory, setHasMoreHistory] = useState(true);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const scrollContainerRef = useRef(null);
-
-  // const API_BASE_URL = "http://localhost:3005";
-  const API_BASE_URL = "https://o2d-backend-2.onrender.com"; // your backend URL
-
 
   // ✅ Reset pagination and fetch fresh data when filters change
   useEffect(() => {
@@ -243,7 +240,6 @@ export function GenerateInvoiceView() {
       }
     } catch (err) {
       setError("Error fetching data: " + err.message);
-      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -392,22 +388,21 @@ export function GenerateInvoiceView() {
             </div>
             <div
               ref={scrollContainerRef}
-              className="overflow-x-auto mobile-card-view"
-              style={{ maxHeight: '350px', overflowY: 'auto' }}
+              className="overflow-x-auto relative"
+              style={{ maxHeight: '500px', overflowY: 'auto' }}
             >
-              {/* Rest of the pending table content remains the same */}
-              <table className="w-full hidden md:table">
-                <thead className="bg-gray-50 border-b">
+              <table className="w-full table-auto text-sm">
+                <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Planned Time</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">In Time</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Out Time</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Entry</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">WB Slip No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Planned Time</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">In Time</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Out Time</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Order Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Gate Entry</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Customer</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Truck Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">WB Slip No</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Remarks</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -424,19 +419,19 @@ export function GenerateInvoiceView() {
                   {pendingData.length > 0 ? (
                     pendingData.map((entry, index) => (
                       <tr key={`${entry.gateEntryNumber}-${index}`} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.plannedFormatted}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.indateFormatted}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.outdateFormatted}</td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.orderNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.gateEntryNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.customerName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.truckNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.plannedFormatted}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.indateFormatted}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.outdateFormatted}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{entry.orderNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.gateEntryNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.customerName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.truckNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                             {entry.wbSlipNo}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap max-w-xs truncate text-gray-900">{entry.remarks}</td>
+                        <td className="px-4 py-3 whitespace-nowrap max-w-xs truncate text-gray-900 text-xs sm:text-sm">{entry.remarks}</td>
                       </tr>
                     ))
                   ) : (
@@ -448,61 +443,6 @@ export function GenerateInvoiceView() {
                   )}
                 </tbody>
               </table>
-
-              {/* Mobile view remains the same */}
-              <div className="md:hidden">
-                {pendingData.length > 0 ? (
-                  pendingData.map((entry, index) => (
-                    <div key={`${entry.gateEntryNumber}-${index}`} className="mobile-card">
-                      {/* Mobile card content remains the same */}
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Planned Time:</span>
-                        <span className="mobile-card-value">{entry.plannedFormatted}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">In Time:</span>
-                        <span className="mobile-card-value">{entry.indateFormatted}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Out Time:</span>
-                        <span className="mobile-card-value">{entry.outdateFormatted}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Order Number:</span>
-                        <span className="mobile-card-value">{entry.orderNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Gate Entry:</span>
-                        <span className="mobile-card-value">{entry.gateEntryNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Customer:</span>
-                        <span className="mobile-card-value">{entry.customerName}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Truck Number:</span>
-                        <span className="mobile-card-value">{entry.truckNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">WB Slip No:</span>
-                        <span className="mobile-card-value">
-                          <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                            {entry.wbSlipNo}
-                          </span>
-                        </span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Remarks:</span>
-                        <span className="mobile-card-value">{entry.remarks}</span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-6 py-8 text-center text-gray-500">
-                    {customerFilter || searchTerm ? 'No records found for current filters' : 'No pending records found'}
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         )}
@@ -518,22 +458,21 @@ export function GenerateInvoiceView() {
             </div>
             <div
               ref={scrollContainerRef}
-              className="overflow-x-auto mobile-card-view"
-              style={{ maxHeight: '350px', overflowY: 'auto' }}
+              className="overflow-x-auto relative"
+              style={{ maxHeight: '500px', overflowY: 'auto' }}
             >
-              {/* Rest of the history table content remains the same */}
-              <table className="w-full hidden md:table">
-                <thead className="bg-gray-50 border-b">
+              <table className="w-full table-auto text-sm">
+                <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Planned Time</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actual Time</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Entry</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">WB Slip No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waybill No</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Planned Time</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Actual Time</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Order Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Gate Entry</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Customer</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Truck Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">WB Slip No</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Invoice Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Waybill No</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -550,23 +489,23 @@ export function GenerateInvoiceView() {
                   {historyData.length > 0 ? (
                     historyData.map((entry, index) => (
                       <tr key={`${entry.invoiceNumber}-${index}`} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.plannedFormatted}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.actualFormatted}</td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.orderNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.gateEntryNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.customerName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.truckNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.plannedFormatted}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.actualFormatted}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{entry.orderNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.gateEntryNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.customerName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.truckNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                             {entry.wbSlipNo}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
                             {entry.invoiceNumber}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
                             {entry.waybillNo}
                           </span>
@@ -582,69 +521,6 @@ export function GenerateInvoiceView() {
                   )}
                 </tbody>
               </table>
-
-              {/* Mobile view remains the same */}
-              <div className="md:hidden">
-                {historyData.length > 0 ? (
-                  historyData.map((entry, index) => (
-                    <div key={`${entry.invoiceNumber}-${index}`} className="mobile-card">
-                      {/* Mobile card content remains the same */}
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Planned Time:</span>
-                        <span className="mobile-card-value">{entry.plannedFormatted}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Actual Time:</span>
-                        <span className="mobile-card-value">{entry.actualFormatted}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Order Number:</span>
-                        <span className="mobile-card-value">{entry.orderNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Gate Entry:</span>
-                        <span className="mobile-card-value">{entry.gateEntryNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Customer:</span>
-                        <span className="mobile-card-value">{entry.customerName}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Truck Number:</span>
-                        <span className="mobile-card-value">{entry.truckNumber}</span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">WB Slip No:</span>
-                        <span className="mobile-card-value">
-                          <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                            {entry.wbSlipNo}
-                          </span>
-                        </span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Invoice Number:</span>
-                        <span className="mobile-card-value">
-                          <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
-                            {entry.invoiceNumber}
-                          </span>
-                        </span>
-                      </div>
-                      <div className="mobile-card-row">
-                        <span className="mobile-card-label">Waybill No:</span>
-                        <span className="mobile-card-value">
-                          <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                            {entry.waybillNo}
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-6 py-8 text-center text-gray-500">
-                    {customerFilter || searchTerm ? 'No records found for current filters' : 'No history records found'}
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         )}

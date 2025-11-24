@@ -6,6 +6,7 @@ import {
   Scale,
   LayoutDashboard,
   LogIn,
+  UserPlus,
   Weight,
   PackageCheck,
   Receipt,
@@ -28,7 +29,9 @@ import { PaymentView } from "@/components/payment-view"
 import { OrdersView } from "@/components/order-view"
 import { ComplaintDetailsView } from "@/components/complaint-details-view"
 import { PartyFeedbackView } from "@/components/party-feedback-view"
+import { RegisterView } from "@/components/register-view"
 import { LoginForm } from "@/components/login-form"
+import { useAuth } from "@/components/auth-context"
 import Image from "next/image"
 import logo from "@/public/Screenshot_2025-08-13_at_1.45.14_PM-removebg-preview.png"
 
@@ -44,75 +47,79 @@ const sidebarItems = [
   { id: "payment", label: "Payment", icon: Wallet },
   { id: "complaint-details", label: "Complaint Details", icon: MessageSquare },
   { id: "party-feedback", label: "Party Feedback", icon: Star },
+  { id: "register", label: "User Register", icon: UserPlus },
 ]
 
 export default function O2DSystem() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [userAccess, setUserAccess] = useState<string[]>([])
-  // ✅ Fixed: Initialize activeView as null, will be set based on user access
+  const { isAuthenticated, access: userAccess, logout: authLogout, loading: authLoading, user } = useAuth()
+  // ✅ Initialize activeView as null, will be set based on user access
   const [activeView, setActiveView] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const isAdmin =
+    user?.role?.toLowerCase?.() === "admin" ||
+    userAccess.includes("admin") ||
+    userAccess.length === sidebarItems.length
 
   useEffect(() => {
-    const savedAuth = localStorage.getItem("o2d_auth")
-    const savedAccess = localStorage.getItem("o2d_access")
-    const savedView = localStorage.getItem("o2d_active_view")
+    const savedView = localStorage.getItem("o2d_active_view");
 
-    if (savedAuth === "true" && savedAccess) {
-      setIsAuthenticated(true)
-      const accessPermissions = JSON.parse(savedAccess)
-      setUserAccess(accessPermissions)
-      
-      // ✅ Fixed: Only set view to accessible pages, no dashboard fallback
-      if (savedView && accessPermissions.includes(savedView)) {
-        setActiveView(savedView)
-      } else {
-        // Set to first accessible view from their permissions
-        const firstAccessibleView = sidebarItems.find((item) => accessPermissions.includes(item.id))?.id
-        if (firstAccessibleView) {
-          setActiveView(firstAccessibleView)
-          localStorage.setItem("o2d_active_view", firstAccessibleView)
-        }
-      }
+    if (!isAuthenticated) {
+      setActiveView(null);
+      return;
     }
-  }, [])
 
-  const handleLogin = (accessPermissions: string[]) => {
-    setIsAuthenticated(true)
-    setUserAccess(accessPermissions)
+    const savedIsValid =
+      savedView && (isAdmin || userAccess.includes(savedView));
 
-    localStorage.setItem("o2d_auth", "true")
-    localStorage.setItem("o2d_access", JSON.stringify(accessPermissions))
+    if (savedIsValid) {
+      setActiveView(savedView);
+      return;
+    }
 
-    // ✅ Fixed: Set to first accessible view from their permissions
-    const firstAccessibleView = sidebarItems.find((item) => accessPermissions.includes(item.id))?.id
+    const dashboardAvailable = isAdmin || userAccess.includes("dashboard");
+    if (dashboardAvailable) {
+      setActiveView("dashboard");
+      localStorage.setItem("o2d_active_view", "dashboard");
+      return;
+    }
+
+    const firstAccessibleView = sidebarItems.find(
+      (item) => item.id !== "register" && userAccess.includes(item.id)
+    )?.id;
+
     if (firstAccessibleView) {
-      setActiveView(firstAccessibleView)
-      localStorage.setItem("o2d_active_view", firstAccessibleView)
+      setActiveView(firstAccessibleView);
+      localStorage.setItem("o2d_active_view", firstAccessibleView);
     }
-  }
+  }, [isAuthenticated, userAccess]);
 
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    setUserAccess([])
-    setActiveView(null) // ✅ Fixed: Reset to null instead of dashboard
-    localStorage.removeItem("o2d_auth")
-    localStorage.removeItem("o2d_access")
+  const handleLogout = async () => {
+    await authLogout()
+    setActiveView(null)
     localStorage.removeItem("o2d_active_view")
   }
 
   const handleViewChange = (viewId: string) => {
-    setActiveView(viewId)
-    localStorage.setItem("o2d_active_view", viewId)
-    setIsMobileMenuOpen(false)
+    setActiveView(viewId);
+    localStorage.setItem("o2d_active_view", viewId);
+    setIsMobileMenuOpen(false);
+  };
+
+  const accessibleItems = sidebarItems.filter((item) => {
+    if (isAdmin) return true;
+    return userAccess.includes(item.id);
+  });
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    )
   }
 
-  const accessibleItems = sidebarItems.filter(
-    (item) => userAccess.includes(item.id)
-  )
-
   if (!isAuthenticated) {
-    return <LoginForm onLogin={handleLogin} />
+    return <LoginForm />
   }
 
   const renderActiveView = () => {
@@ -160,6 +167,8 @@ export default function O2DSystem() {
         return <ComplaintDetailsView />
       case "party-feedback":
         return <PartyFeedbackView />
+      case "register":
+        return <RegisterView />
       default:
         return (
           <div className="flex items-center justify-center h-full">
@@ -190,7 +199,8 @@ export default function O2DSystem() {
                 alt="O2D Logo"
                 width={72}
                 height={72}
-                className="rounded-md"
+                className="rounded-md w-[72px] h-[72px]"
+                priority
               />
               <div>
                 <h1 className="text-lg lg:text-xl font-bold text-black">O2D System</h1>
@@ -256,7 +266,15 @@ export default function O2DSystem() {
         </div>
 
         <div className="flex-1 overflow-auto">
-          <div className="p-4 lg:p-6">{renderActiveView()}</div>
+          <div className="p-4 lg:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Welcome back</p>
+                <p className="text-base font-semibold text-foreground">{user?.username || "User"}</p>
+              </div>
+            </div>
+            {renderActiveView()}
+          </div>
         </div>
 
         <footer className="bg-background border-t border-border p-3 lg:p-4">

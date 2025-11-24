@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from 'react'
+import { API_BASE_URL } from "../config/api";
 
 export function FirstWeightView() {
   const [pendingData, setPendingData] = useState([])
@@ -18,9 +19,6 @@ export function FirstWeightView() {
   const [hasMoreHistory, setHasMoreHistory] = useState(true);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const scrollContainerRef = useRef(null);
-
-  const API_BASE_URL = "https://o2d-backend-2.onrender.com"; // your backend URL
-
 
   // ✅ Load data when tab changes (only once per tab)
   useEffect(() => {
@@ -340,13 +338,13 @@ useEffect(() => {
             </div>
             <div
   ref={scrollContainerRef}
-  className="overflow-x-auto mobile-card-view"
-  style={{ maxHeight: '350px', overflowY: 'auto' }}
+  className="overflow-x-auto mobile-card-view relative"
+  style={{ maxHeight: '500px', overflowY: 'auto' }}
 >
 
-  {/* Desktop Table View */}
-  <table className="w-full hidden md:table">
-    <thead className="bg-gray-50 border-b">
+  {/* Table View (shown on all screen sizes with horizontal scroll on small devices) */}
+  <table className="w-full min-w-[700px]">
+    <thead className="bg-white border-b sticky top-0 z-10">
       <tr>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Entry Number</th>
@@ -358,7 +356,10 @@ useEffect(() => {
     <tbody className="divide-y divide-gray-200">
       {filteredPendingData.length > 0 ? (
         filteredPendingData.map((entry, index) => (
-          <tr key={entry.gateEntryNumber || index} className="hover:bg-gray-50">
+          <tr
+            key={`${entry.gateEntryNumber || entry.orderNumber || "pending"}-${index}`}
+            className="hover:bg-gray-50"
+          >
             <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.orderNumber}</td>
             <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.gateEntryNumber}</td>
             <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.customerName}</td>
@@ -376,39 +377,6 @@ useEffect(() => {
     </tbody>
   </table>
 
-  {/* Mobile Card View */}
-  <div className="md:hidden">
-    {filteredPendingData.length > 0 ? (
-      filteredPendingData.map((entry, index) => (
-        <div key={entry.gateEntryNumber || index} className="mobile-card">
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Order Number:</span>
-            <span className="mobile-card-value">{entry.orderNumber}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Gate Entry Number:</span>
-            <span className="mobile-card-value">{entry.gateEntryNumber}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Customer Name:</span>
-            <span className="mobile-card-value">{entry.customerName}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Truck Number:</span>
-            <span className="mobile-card-value">{entry.truckNumber}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Planned:</span>
-            <span className="mobile-card-value">{entry.planned2}</span>
-          </div>
-        </div>
-      ))
-    ) : (
-      <div className="px-6 py-8 text-center text-gray-500">
-        No pending records found
-      </div>
-    )}
-  </div>
 </div>
           </div>
         )}
@@ -422,13 +390,13 @@ useEffect(() => {
             </div>
             <div
   ref={scrollContainerRef}
-  className="overflow-x-auto mobile-card-view"
-  style={{ maxHeight: '350px', overflowY: 'auto' }}
+  className="overflow-x-auto mobile-card-view relative"
+  style={{ maxHeight: '500px', overflowY: 'auto' }}
 >
 
-  {/* Desktop Table View */}
-  <table className="w-full hidden md:table">
-    <thead className="bg-gray-50 border-b">
+  {/* Table View (shown on all screen sizes with horizontal scroll on small devices) */}
+  <table className="w-full min-w-[700px]">
+    <thead className="bg-white border-b sticky top-0 z-10">
       <tr>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Entry Number</th>
@@ -440,7 +408,10 @@ useEffect(() => {
     <tbody className="divide-y divide-gray-200">
       {filteredHistoryData.length > 0 ? (
         filteredHistoryData.map((entry, index) => (
-          <tr key={entry.gateEntryNumber || index} className="hover:bg-gray-50">
+          <tr
+            key={`${entry.gateEntryNumber || entry.orderNumber || "history"}-${index}`}
+            className="hover:bg-gray-50"
+          >
             <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.orderNumber}</td>
             <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.gateEntryNumber}</td>
             <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.customerName}</td>
@@ -462,43 +433,6 @@ useEffect(() => {
     </tbody>
   </table>
 
-  {/* Mobile Card View */}
-  <div className="md:hidden">
-    {filteredHistoryData.length > 0 ? (
-      filteredHistoryData.map((entry, index) => (
-        <div key={entry.gateEntryNumber || index} className="mobile-card">
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Order Number:</span>
-            <span className="mobile-card-value">{entry.orderNumber}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Gate Entry Number:</span>
-            <span className="mobile-card-value">{entry.gateEntryNumber}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Customer Name:</span>
-            <span className="mobile-card-value">{entry.customerName}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">Truck Number:</span>
-            <span className="mobile-card-value">{entry.truckNumber}</span>
-          </div>
-          <div className="mobile-card-row">
-            <span className="mobile-card-label">WB Slip No:</span>
-            <span className="mobile-card-value">
-              <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                {entry.wbSlipNo}
-              </span>
-            </span>
-          </div>
-        </div>
-      ))
-    ) : (
-      <div className="px-6 py-8 text-center text-gray-500">
-        No history records found
-      </div>
-    )}
-  </div>
 </div>
           </div>
         )}

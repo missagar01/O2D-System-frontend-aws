@@ -186,42 +186,45 @@ export function PartyFeedbackView() {
             All customer feedback and ratings ({feedbackData.length} records)
           </p>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
+        <div
+          className="overflow-x-auto relative"
+          style={{ maxHeight: '600px', overflowY: 'auto' }}
+        >
+          <table className="w-full table-auto text-sm">
+            <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Firm Name</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enquiry Revert</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loading</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dispatch</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle Lineup</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Communication</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Satisfaction</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff Rating</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quality</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Additional Feedback</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Timestamp</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Customer Name</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Firm Name</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Contact</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Enquiry Revert</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Loading</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Dispatch</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Vehicle Lineup</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Communication</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Satisfaction</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Staff Rating</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Quality</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Additional Feedback</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {feedbackData.length > 0 ? (
                 feedbackData.map((feedback, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{feedback.timestamp}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{feedback.customerName}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{feedback.firmName}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{feedback.contactNumber}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm">{renderRating(feedback.enquiryRevertRating)}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm">{renderRating(feedback.loadingRating)}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm">{renderRating(feedback.dispatchRating)}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm">{renderRating(feedback.vehicleLineupRating)}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm">{renderRating(feedback.communicationRating)}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm">{renderRating(feedback.satisfactionRating)}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm">{renderRating(feedback.staffRating)}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm">{renderRating(feedback.qualityRating)}</td>
-                    <td className="px-4 py-4 text-sm text-gray-900 max-w-xs">
+                    <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{feedback.timestamp}</td>
+                    <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{feedback.customerName}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{feedback.firmName}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{feedback.contactNumber}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{renderRating(feedback.enquiryRevertRating)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{renderRating(feedback.loadingRating)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{renderRating(feedback.dispatchRating)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{renderRating(feedback.vehicleLineupRating)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{renderRating(feedback.communicationRating)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{renderRating(feedback.satisfactionRating)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{renderRating(feedback.staffRating)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{renderRating(feedback.qualityRating)}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900 max-w-xs">
                       <div className="truncate" title={feedback.additionalFeedback}>
                         {feedback.additionalFeedback}
                       </div>

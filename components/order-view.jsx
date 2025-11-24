@@ -98,7 +98,6 @@ export function OrdersView() {
             }
           } catch (e) {
             // If parsing fails, keep the original date
-            console.log('Date parsing error:', e);
           }
         }
 
@@ -155,7 +154,6 @@ export function OrdersView() {
       setPartialOrders(partial)
 
     } catch (err) {
-      console.error('Error fetching data:', err)
       setError(err.message)
     } finally {
       setLoading(false)
@@ -241,9 +239,6 @@ export function OrdersView() {
     
     const itemIndex = headers.findIndex(h => h.toLowerCase().includes('item'))
 
-    console.log('Customer Index:', customerIndex)
-    console.log('Sample customer data:', rows[0] ? rows[0][customerIndex] : 'No data')
-
     // Process rows into history objects
     const processedHistory = rows.map((row, index) => ({
       id: index + 1,
@@ -261,7 +256,6 @@ export function OrdersView() {
     setFilteredHistory(processedHistory)
     
   } catch (err) {
-    console.error('Error fetching history data:', err)
     alert('Error fetching history data: ' + err.message)
   } finally {
     setLoading(false)
@@ -340,7 +334,6 @@ export function OrdersView() {
         throw new Error(result.error || 'Failed to submit data')
       }
     } catch (err) {
-      console.error('Error submitting form:', err)
       alert('Error submitting form: ' + err.message)
     } finally {
       setSubmitting(false)

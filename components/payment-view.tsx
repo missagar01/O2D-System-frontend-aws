@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from 'react'
+import { API_BASE_URL } from "../config/api";
 
 export function PaymentView() {
   const [pendingData, setPendingData] = useState([])
@@ -23,10 +24,6 @@ export function PaymentView() {
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false)
   const [customerSearch, setCustomerSearch] = useState("")
   const customerDropdownRef = useRef(null)
-
-  // const API_BASE_URL = "http://localhost:3005"
-  const API_BASE_URL = "https://o2d-backend-2.onrender.com"; // your backend URL
-
   const [sortOrder, setSortOrder] = useState('none')
 
   // Close dropdown when clicking outside
@@ -61,7 +58,6 @@ export function PaymentView() {
         setAllCustomers(result.data.filter(name => name).sort());
       }
     } catch (error) {
-      console.error('Error fetching customers:', error);
     }
   };
 
@@ -120,8 +116,6 @@ export function PaymentView() {
         }
 
         const url = `${API_BASE_URL}/payment/pending?${params.toString()}`;
-        console.log('Fetching pending payment data from:', url);
-        
         const res = await fetch(url);
         
         const contentType = res.headers.get('content-type');
@@ -131,7 +125,6 @@ export function PaymentView() {
         }
 
         const result = await res.json();
-        console.log('Pending payment API response:', result);
 
         if (result.success && Array.isArray(result.data)) {
           const pending = result.data.map(item => ({
@@ -174,8 +167,6 @@ export function PaymentView() {
         }
 
         const url = `${API_BASE_URL}/payment/history?${params.toString()}`;
-        console.log('Fetching payment history data from:', url);
-        
         const res = await fetch(url);
         
         const contentType = res.headers.get('content-type');
@@ -185,7 +176,6 @@ export function PaymentView() {
         }
 
         const result = await res.json();
-        console.log('Payment history API response:', result);
 
         if (result.success && Array.isArray(result.data)) {
           const history = result.data.map(item => ({
@@ -216,7 +206,6 @@ export function PaymentView() {
       }
     } catch (err) {
       setError("Error fetching data: " + err.message);
-      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -275,10 +264,6 @@ export function PaymentView() {
         nextDateOfCall: nextDateOfCall || ""
       }
 
-      // Here you would typically send this to your backend API
-      // For now, we'll just show a success message
-      console.log('Payment data to be processed:', paymentData);
-      
       // Reset form
       setSelectedEntry(null)
       setPaymentStatus("")
@@ -523,26 +508,29 @@ export function PaymentView() {
                 {customerFilter || searchTerm ? ` (${pendingData.length} records)` : ''}
               </p>
             </div>
-            <div className="overflow-x-auto" style={{ maxHeight: '360px', overflowY: 'auto' }}>
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b">
+            <div
+              className="overflow-x-auto relative"
+              style={{ maxHeight: '500px', overflowY: 'auto' }}
+            >
+              <table className="w-full table-auto text-sm">
+                <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Planned</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Entry</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={handleSort}>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Planned</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Order Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Gate Entry</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap cursor-pointer" onClick={handleSort}>
                       Customer Name
                       {sortOrder === 'asc' && ' ↑'}
                       {sortOrder === 'desc' && ' ↓'}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delay (Days)</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance Amount</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Truck Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Invoice Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Item Name</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Quantity</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Delay (Days)</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Total Amount</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Received Amount</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Balance Amount</th>
                     {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th> */}
                   </tr>
                 </thead>
@@ -550,19 +538,19 @@ export function PaymentView() {
                   {pendingData.length > 0 ? (
                     pendingData.map((entry, index) => (
                       <tr key={`${entry.invoiceNumber}-${index}`} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.plannedFormatted}</td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.orderNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.gateEntryNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.customerName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.truckNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.plannedFormatted}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{entry.orderNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.gateEntryNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.customerName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.truckNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                             {entry.invoiceNumber}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.itemName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.quantity}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.itemName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.quantity}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                             parseInt(entry.delay) > 7 
                               ? 'bg-red-100 text-red-800' 
@@ -573,9 +561,9 @@ export function PaymentView() {
                             {entry.delay} days
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.totalAmount}</td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-green-600">{entry.receivedAmount}</td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-red-600">{entry.balanceAmount}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{entry.totalAmount}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-green-600 text-xs sm:text-sm">{entry.receivedAmount}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-red-600 text-xs sm:text-sm">{entry.balanceAmount}</td>
                         {/* <td className="px-6 py-4 whitespace-nowrap">
                           <button
                             onClick={() => openDialog(entry)}
@@ -609,36 +597,39 @@ export function PaymentView() {
                 {customerFilter || searchTerm ? ` (${historyData.length} records)` : ''}
               </p>
             </div>
-            <div className="overflow-x-auto" style={{ maxHeight: '380px', overflowY: 'auto' }}>
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b">
+            <div
+              className="overflow-x-auto relative"
+              style={{ maxHeight: '500px', overflowY: 'auto' }}
+            >
+              <table className="w-full table-auto text-sm">
+                <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance Amount</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Order Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Customer Name</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Invoice Number</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Item Name</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Quantity</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Total Amount</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Received Amount</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Balance Amount</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {historyData.length > 0 ? (
                     historyData.map((entry, index) => (
                       <tr key={`${entry.invoiceNumber}-${index}`} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.orderNumber}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.customerName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{entry.orderNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.customerName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
                             {entry.invoiceNumber}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.itemName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-900">{entry.quantity}</td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{entry.totalAmount}</td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-green-600">{entry.receivedAmount}</td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-green-600">
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.itemName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.quantity}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 text-xs sm:text-sm">{entry.totalAmount}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-green-600 text-xs sm:text-sm">{entry.receivedAmount}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-green-600 text-xs sm:text-sm">
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                             parseFloat(entry.balanceAmount) === 0 
                               ? 'bg-green-100 text-green-800' 
