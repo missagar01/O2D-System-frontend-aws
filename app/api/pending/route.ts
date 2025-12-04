@@ -27,6 +27,13 @@ export async function GET() {
     return NextResponse.json({ success: true, data: rows });
   } catch (err: any) {
     console.error("Oracle error:", err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Oracle DB is not available in this deployment.",
+        detail: err?.message || String(err),
+      },
+      { status: 501 },
+    );
   }
 }
