@@ -518,6 +518,7 @@ export function DashboardView() {
                   setSelectedParty("All Parties")
                   setSelectedItem("All Items")
                   setSelectedSales("All Salespersons")
+                  setSelectedState("All States")
                   setFromDate(null)
                   setToDate(null)
                 }}
