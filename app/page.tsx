@@ -132,8 +132,9 @@ export default function O2DSystem() {
       )
     }
 
-    // ✅ Fixed: Check if user has access to the current view
-    if (!userAccess.includes(activeView)) {
+    const canAccess = isAdmin || userAccess.includes(activeView);
+    // ✅ Fixed: Check if user has access to the current view (admins bypass)
+    if (!canAccess) {
       return (
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
@@ -191,64 +192,66 @@ export default function O2DSystem() {
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
       `}
       >
-        <div className="p-4 lg:p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Image
-                src={logo}
-                alt="O2D Logo"
-                width={72}
-                height={72}
-                className="rounded-md w-[72px] h-[72px]"
-                priority
-              />
-              <div>
-                <h1 className="text-lg lg:text-xl font-bold text-black">O2D System</h1>
-                <p className="text-xs lg:text-sm text-sidebar-foreground/70 mt-1">Order to Dispatch</p>
+        <div className="flex h-full flex-col">
+          <div className="p-4 lg:p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Image
+                  src={logo}
+                  alt="O2D Logo"
+                  width={72}
+                  height={72}
+                  className="rounded-md w-[72px] h-[72px]"
+                  priority
+                />
+                <div>
+                  <h1 className="text-lg lg:text-xl font-bold text-black">O2D System</h1>
+                  <p className="text-xs lg:text-sm text-sidebar-foreground/70 mt-1">Order to Dispatch</p>
+                </div>
               </div>
-            </div>
 
+              <Button
+                variant="ghost"
+                size="sm"
+                className="lg:hidden text-sidebar-foreground"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <nav className="px-3 lg:px-4 space-y-1 lg:space-y-2 flex-1 overflow-y-auto pb-16">
+            {accessibleItems.map((item) => {
+              const Icon = item.icon
+              return (
+                <Button
+                  key={item.id}
+                  variant={activeView === item.id ? "secondary" : "ghost"}
+                  className={`w-full justify-start gap-2 lg:gap-3 text-sm lg:text-base py-2 lg:py-2.5 ${
+                    activeView === item.id
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                  }`}
+                  onClick={() => handleViewChange(item.id)}
+                >
+                  <Icon className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                </Button>
+              )
+            })}
+          </nav>
+
+          <div className="px-4 pb-4">
             <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden text-sidebar-foreground"
-              onClick={() => setIsMobileMenuOpen(false)}
+              variant="outline"
+              className="w-full justify-start gap-2 text-sm bg-transparent"
+              onClick={handleLogout}
             >
-              <X className="h-4 w-4" />
+              <LogIn className="h-4 w-4" />
+              Logout
             </Button>
           </div>
-        </div>
-
-        <nav className="px-3 lg:px-4 space-y-1 lg:space-y-2">
-          {accessibleItems.map((item) => {
-            const Icon = item.icon
-            return (
-              <Button
-                key={item.id}
-                variant={activeView === item.id ? "secondary" : "ghost"}
-                className={`w-full justify-start gap-2 lg:gap-3 text-sm lg:text-base py-2 lg:py-2.5 ${
-                  activeView === item.id
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                }`}
-                onClick={() => handleViewChange(item.id)}
-              >
-                <Icon className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{item.label}</span>
-              </Button>
-            )
-          })}
-        </nav>
-
-        <div className="absolute bottom-4 left-4 right-4">
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2 text-sm bg-transparent"
-            onClick={handleLogout}
-          >
-            <LogIn className="h-4 w-4" />
-            Logout
-          </Button>
         </div>
       </div>
 
