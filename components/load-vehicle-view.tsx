@@ -9,6 +9,8 @@ type PermissionFlags = {
   delete: boolean
 }
 
+
+
 const normalizePermissions = (value?: Partial<PermissionFlags>): PermissionFlags => ({
   read: value?.read ?? true,
   write: value?.write ?? false,
