@@ -1,5 +1,20 @@
 "use client"
 import { useState, useEffect } from 'react'
+import { useAuth } from "./auth-context"
+
+type PermissionFlags = {
+  read: boolean
+  write: boolean
+  update: boolean
+  delete: boolean
+}
+
+const normalizePermissions = (value?: Partial<PermissionFlags>): PermissionFlags => ({
+  read: value?.read ?? true,
+  write: value?.write ?? false,
+  update: value?.update ?? false,
+  delete: value?.delete ?? false,
+})
 
 export function LoadVehicleView() {
   const [pendingData, setPendingData] = useState([])
@@ -13,6 +28,11 @@ export function LoadVehicleView() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
   const [supervisorOptions, setSupervisorOptions] = useState([]) // New state for supervisor names
+  const { user } = useAuth()
+  const userPermissions = normalizePermissions(
+    (user as any)?.permissions || (user as any)?.user_permissions
+  )
+  const canLoad = userPermissions.write || userPermissions.update || userPermissions.delete
 
   const [itemName, setItemName] = useState("")
   const [qualityController, setQualityController] = useState("")
@@ -380,12 +400,16 @@ const handleLoadVehicle = async () => {
                         <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.itemName}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-gray-900 text-xs sm:text-sm">{entry.planned3}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <button
-                            onClick={() => openDialog(entry)}
-                            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-                          >
-                            Load
-                          </button>
+                          {canLoad ? (
+                            <button
+                              onClick={() => openDialog(entry)}
+                              className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+                            >
+                              Load
+                            </button>
+                          ) : (
+                            <span className="text-xs text-gray-400">View only</span>
+                          )}
                         </td>
                       </tr>
                     ))

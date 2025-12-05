@@ -17,6 +17,7 @@ import {
   ShoppingCart,
   MessageSquare,
   Star,
+  ShieldCheck,
 } from "lucide-react"
 import { DashboardView } from "@/components/dashboard-view"
 import { GateEntryView } from "@/components/gate-entry-view"
@@ -30,6 +31,7 @@ import { OrdersView } from "@/components/order-view"
 import { ComplaintDetailsView } from "@/components/complaint-details-view"
 import { PartyFeedbackView } from "@/components/party-feedback-view"
 import { RegisterView } from "@/components/register-view"
+import { PermissionsView } from "@/components/permissions-view"
 import { LoginForm } from "@/components/login-form"
 import { useAuth } from "@/components/auth-context"
 import Image from "next/image"
@@ -47,6 +49,7 @@ const sidebarItems = [
   { id: "payment", label: "Payment", icon: Wallet },
   { id: "complaint-details", label: "Complaint Details", icon: MessageSquare },
   { id: "party-feedback", label: "Party Feedback", icon: Star },
+  { id: "permissions", label: "Permissions", icon: ShieldCheck },
   { id: "register", label: "User Register", icon: UserPlus },
 ]
 
@@ -168,6 +171,8 @@ export default function O2DSystem() {
         return <ComplaintDetailsView />
       case "party-feedback":
         return <PartyFeedbackView />
+      case "permissions":
+        return <PermissionsView />
       case "register":
         return <RegisterView />
       default:

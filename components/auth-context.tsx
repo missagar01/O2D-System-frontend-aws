@@ -29,6 +29,7 @@ type AuthContextValue = {
   user: User | null;
   access: string[];
   isAuthenticated: boolean;
+  token: string | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<string[]>;
   logout: () => Promise<void>;
@@ -46,6 +47,7 @@ const ALL_ACCESS = [
   "payment",
   "complaint-details",
   "party-feedback",
+  "permissions",
   "register",
 ];
 
@@ -74,27 +76,49 @@ const parseAccess = (raw?: string | null) => {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [access, setAccess] = useState<string[]>([]);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = storage?.getItem(STORAGE_KEYS.user);
     const storedAccess = storage?.getItem(STORAGE_KEYS.access);
+    const storedToken = storage?.getItem(STORAGE_KEYS.token);
+
+    let parsedUser: User | null = null;
+    let parsedAccess: string[] | null = null;
 
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
       } catch (error) {
       }
     }
 
     if (storedAccess) {
       try {
-        const parsedAccess = JSON.parse(storedAccess);
-        if (Array.isArray(parsedAccess)) {
-          setAccess(parsedAccess);
+        const parsed = JSON.parse(storedAccess);
+        if (Array.isArray(parsed)) {
+          parsedAccess = parsed;
+          setAccess(parsed);
         }
       } catch (error) {
       }
+    }
+
+    if (storedToken) {
+      setToken(storedToken);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+    }
+
+    // If the user has "all" access, always expand to the latest ALL_ACCESS list
+    const userHasAll = parsedUser?.access?.trim?.().toLowerCase() === "all";
+
+    if (userHasAll) {
+      setAccess(ALL_ACCESS);
+      storage?.setItem(STORAGE_KEYS.access, JSON.stringify(ALL_ACCESS));
+    } else if (parsedAccess && parsedAccess.length) {
+      setAccess(parsedAccess);
     }
 
     setLoading(false);
@@ -114,8 +138,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearAuth = useCallback(() => {
     setUser(null);
     setAccess([]);
+    setToken(null);
     storage?.removeItem(STORAGE_KEYS.user);
     storage?.removeItem(STORAGE_KEYS.access);
+    storage?.removeItem(STORAGE_KEYS.token);
+    delete axios.defaults.headers.common["Authorization"];
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {
@@ -133,9 +160,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const nextUser: User = result.data.user;
+      const nextToken: string = result.data.token;
       const nextAccess = parseAccess(nextUser.access);
 
       persistAuth(nextUser, nextAccess);
+      setToken(nextToken);
+      storage?.setItem(STORAGE_KEYS.token, nextToken);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${nextToken}`;
       return nextAccess;
     } finally {
       setLoading(false);
@@ -156,11 +187,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       access,
       isAuthenticated: Boolean(user && access.length),
+      token,
       loading,
       login,
       logout,
     }),
-    [access, loading, login, logout, user]
+    [access, loading, login, logout, token, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
