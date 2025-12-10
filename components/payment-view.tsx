@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type UIEvent } from 'react'
 import { API_BASE_URL } from "../config/api";
 
 export function PaymentView() {
@@ -25,6 +25,18 @@ export function PaymentView() {
   const [customerSearch, setCustomerSearch] = useState("")
   const customerDropdownRef = useRef(null)
   const [sortOrder, setSortOrder] = useState('none')
+  const PAGE_SIZE = 50
+  const [pendingPage, setPendingPage] = useState(1)
+  const [historyPage, setHistoryPage] = useState(1)
+  const [pendingHasMore, setPendingHasMore] = useState(true)
+  const [historyHasMore, setHistoryHasMore] = useState(true)
+  const [pendingTotalCount, setPendingTotalCount] = useState<number | null>(null)
+  const [historyTotalCount, setHistoryTotalCount] = useState<number | null>(null)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const displayedPendingCount = pendingTotalCount ?? pendingData.length
+  const displayedHistoryCount = historyTotalCount ?? historyData.length
+  const isPendingTabLoading = loading && activeTab === 'pending' && pendingData.length === 0
+  const isHistoryTabLoading = loading && activeTab === 'history' && historyData.length === 0
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -47,7 +59,7 @@ export function PaymentView() {
 
   // ✅ Fetch data when tab changes or filters change
   useEffect(() => {
-    fetchData();
+    fetchTabData(activeTab, { reset: true });
   }, [activeTab, customerFilter, searchTerm, itemFilter]);
 
   const fetchAllCustomers = async () => {
@@ -98,118 +110,141 @@ export function PaymentView() {
     }
   };
 
-  // ✅ Fetch data from database
-  const fetchData = async () => {
-    try {
-      setError(null);
-      setLoading(true);
+  // ✅ Fetch data from database with pagination support
+  const fetchTabData = async (tab: 'pending' | 'history', options: { reset?: boolean } = {}) => {
+    const shouldReset = options.reset ?? false
+    const isPendingTab = tab === 'pending'
 
-      if (activeTab === "pending") {
-        // Build query parameters for filtering
-        const params = new URLSearchParams();
-        
-        if (customerFilter) {
-          params.append('customer', customerFilter);
-        }
-        if (searchTerm) {
-          params.append('search', searchTerm);
-        }
-
-        const url = `${API_BASE_URL}/payment/pending?${params.toString()}`;
-        const res = await fetch(url);
-        
-        const contentType = res.headers.get('content-type');
-        if (!contentType?.includes('application/json')) {
-          const text = await res.text();
-          throw new Error(`Server returned ${contentType} instead of JSON. Response: ${text.substring(0, 200)}`);
-        }
-
-        const result = await res.json();
-
-        if (result.success && Array.isArray(result.data)) {
-          const pending = result.data.map(item => ({
-            plannedTimestamp: item.PLANNED_TIMESTAMP || "",
-            vRDate: item.VRDATE || "",
-            orderNumber: item.ORDER_VRNO || "",
-            gateEntryNumber: item.GATE_VRNO || "",
-            invoiceNumber: item.VRNO || "",
-            customerName: item.CUSTOMER_NAME || "",
-            truckNumber: item.TRUCKNO || "",
-            itemName: item.ITEM_NAME || "",
-            quantity: item.QTY || "",
-            totalAmount: item.TOTAL_AMOUNT || "",
-            receivedAmount: item.RECEIVED_AMOUNT || "",
-            balanceAmount: item.BALANCE_AMOUNT || "",
-            delay: item.DAYS || "",
-            plannedFormatted: item.PLANNED_TIMESTAMP
-              ? formatDateTime(item.PLANNED_TIMESTAMP)
-              : "",
-            vRDateFormatted: item.VRDATE
-              ? formatDateTime(item.VRDATE)
-              : "",
-          }));
-
-          setPendingData(pending);
-        } else {
-          throw new Error(result.error || 'Failed to fetch pending payment data');
-        }
+    if (!shouldReset) {
+      if (loading || isLoadingMore) {
+        return
       }
 
-      if (activeTab === "history") {
-        // Build query parameters for filtering
-        const params = new URLSearchParams();
-        
-        if (customerFilter) {
-          params.append('customer', customerFilter);
-        }
-        if (searchTerm) {
-          params.append('search', searchTerm);
-        }
+      const hasMore = isPendingTab ? pendingHasMore : historyHasMore
+      if (!hasMore) {
+        return
+      }
+    } else {
+      if (isPendingTab) {
+        setPendingPage(1)
+        setPendingHasMore(true)
+        setPendingTotalCount(null)
+      } else {
+        setHistoryPage(1)
+        setHistoryHasMore(true)
+        setHistoryTotalCount(null)
+      }
+    }
 
-        const url = `${API_BASE_URL}/payment/history?${params.toString()}`;
-        const res = await fetch(url);
-        
-        const contentType = res.headers.get('content-type');
-        if (!contentType?.includes('application/json')) {
-          const text = await res.text();
-          throw new Error(`Server returned ${contentType} instead of JSON. Response: ${text.substring(0, 200)}`);
-        }
+    const currentPage = shouldReset ? 1 : (isPendingTab ? pendingPage : historyPage)
 
-        const result = await res.json();
+    if (shouldReset) {
+      setLoading(true)
+    } else {
+      setIsLoadingMore(true)
+    }
 
-        if (result.success && Array.isArray(result.data)) {
-          const history = result.data.map(item => ({
-            plannedTimestamp: item.PLANNED_TIMESTAMP || "",
-            vRDate: item.VRDATE || "",
-            orderNumber: item.ORDER_VRNO || "",
-            gateEntryNumber: item.GATE_VRNO || "",
-            invoiceNumber: item.VRNO || "",
-            customerName: item.CUSTOMER_NAME || "",
-            truckNumber: item.TRUCKNO || "",
-            itemName: item.ITEM_NAME || "",
-            quantity: item.QTY || "",
-            totalAmount: item.TOTAL_AMOUNT || "",
-            receivedAmount: item.RECEIVED_AMOUNT || "",
-            balanceAmount: item.BALANCE_AMOUNT || "",
-            plannedFormatted: item.PLANNED_TIMESTAMP
-              ? formatDateTime(item.PLANNED_TIMESTAMP)
-              : "",
-            vRDateFormatted: item.VRDATE
-              ? formatDateTime(item.VRDATE)
-              : "",
-          }));
+    setError(null)
 
-          setHistoryData(history);
+    try {
+      const params = new URLSearchParams()
+
+      if (customerFilter) {
+        params.append('customer', customerFilter)
+      }
+      if (searchTerm) {
+        params.append('search', searchTerm)
+      }
+      if (itemFilter) {
+        params.append('item', itemFilter)
+      }
+
+      params.append('page', String(currentPage))
+      params.append('limit', String(PAGE_SIZE))
+
+      const url = `${API_BASE_URL}/payment/${tab}?${params.toString()}`
+      const res = await fetch(url)
+
+      const contentType = res.headers.get('content-type')
+      if (!contentType?.includes('application/json')) {
+        const text = await res.text()
+        throw new Error(`Server returned ${contentType} instead of JSON. Response: ${text.substring(0, 200)}`)
+      }
+
+      const result = await res.json()
+
+      if (result.success && Array.isArray(result.data)) {
+        const normalizedData = result.data.map(item => ({
+          plannedTimestamp: item.PLANNED_TIMESTAMP || "",
+          vRDate: item.VRDATE || "",
+          orderNumber: item.ORDER_VRNO || "",
+          gateEntryNumber: item.GATE_VRNO || "",
+          invoiceNumber: item.VRNO || "",
+          customerName: item.CUSTOMER_NAME || "",
+          truckNumber: item.TRUCKNO || "",
+          itemName: item.ITEM_NAME || "",
+          quantity: item.QTY || "",
+          totalAmount: item.TOTAL_AMOUNT || "",
+          receivedAmount: item.RECEIVED_AMOUNT || "",
+          balanceAmount: item.BALANCE_AMOUNT || "",
+          delay: item.DAYS || "",
+          plannedFormatted: item.PLANNED_TIMESTAMP
+            ? formatDateTime(item.PLANNED_TIMESTAMP)
+            : "",
+          vRDateFormatted: item.VRDATE
+            ? formatDateTime(item.VRDATE)
+            : "",
+        }))
+
+        const existingData = shouldReset ? [] : (isPendingTab ? pendingData : historyData)
+        const combinedData = shouldReset ? normalizedData : [...existingData, ...normalizedData]
+        const totalCount = result.totalCount ?? result.totalRecords ?? result.total ?? null
+        const hasMore = totalCount != null ? combinedData.length < totalCount : normalizedData.length === PAGE_SIZE
+
+        if (isPendingTab) {
+          setPendingData(combinedData)
+          setPendingPage(currentPage + 1)
+          setPendingHasMore(hasMore)
+          setPendingTotalCount(totalCount)
         } else {
-          throw new Error(result.error || 'Failed to fetch payment history data');
+          setHistoryData(combinedData)
+          setHistoryPage(currentPage + 1)
+          setHistoryHasMore(hasMore)
+          setHistoryTotalCount(totalCount)
         }
+      } else {
+        throw new Error(result.error || `Failed to fetch ${isPendingTab ? 'pending payment' : 'payment history'} data`)
       }
     } catch (err) {
-      setError("Error fetching data: " + err.message);
+      setError("Error fetching data: " + err.message)
     } finally {
-      setLoading(false);
+      if (shouldReset) {
+        setLoading(false)
+      }
+      setIsLoadingMore(false)
     }
-  };
+  }
+
+  const handleScroll = (event: UIEvent<HTMLDivElement>, tabType: 'pending' | 'history') => {
+    if (tabType !== activeTab) {
+      return
+    }
+
+    const { scrollTop, scrollHeight, clientHeight } = event.currentTarget
+    const distanceToBottom = scrollHeight - scrollTop - clientHeight
+
+    if (distanceToBottom > 120) {
+      return
+    }
+
+    const hasMore = tabType === 'pending' ? pendingHasMore : historyHasMore
+
+    if (loading || isLoadingMore || !hasMore) {
+      return
+    }
+
+    fetchTabData(tabType)
+  }
 
   // Add this function to handle sorting
   const handleSort = () => {
@@ -275,7 +310,7 @@ export function PaymentView() {
       setShowDialog(false)
       
       // Refresh data
-      await fetchData()
+      await fetchTabData(activeTab, { reset: true })
       
       alert("Payment processed successfully! (This would be saved to database in production)")
     } catch (error) {
@@ -353,7 +388,7 @@ export function PaymentView() {
             <div className="text-center">
               <p className="text-red-500 mb-4">Error: {error}</p>
               <button 
-                onClick={fetchData}
+                onClick={() => fetchTabData(activeTab, { reset: true })}
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Retry
@@ -483,7 +518,7 @@ export function PaymentView() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Pending ({pendingData.length})
+              Pending ({displayedPendingCount})
             </button>
             <button
               onClick={() => setActiveTab('history')}
@@ -493,7 +528,7 @@ export function PaymentView() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              History ({historyData.length})
+              History ({displayedHistoryCount})
             </button>
           </nav>
         </div>
@@ -505,12 +540,13 @@ export function PaymentView() {
               <h3 className="text-lg font-semibold">Pending Payments</h3>
               <p className="text-gray-600 text-sm">
                 {customerFilter ? `Filtered by: ${customerFilter}` : searchTerm ? `Search results for: "${searchTerm}"` : 'Invoices awaiting payment'}
-                {customerFilter || searchTerm ? ` (${pendingData.length} records)` : ''}
+                {customerFilter || searchTerm ? ` (${displayedPendingCount} records)` : ''}
               </p>
             </div>
             <div
               className="overflow-x-auto relative"
               style={{ maxHeight: '500px', overflowY: 'auto' }}
+              onScroll={(e) => handleScroll(e, 'pending')}
             >
               <table className="w-full table-auto text-sm">
                 <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
@@ -583,9 +619,24 @@ export function PaymentView() {
                   )}
                 </tbody>
               </table>
-            </div>
+              {isPendingTabLoading && (
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-white/80 text-xs font-medium text-gray-600">
+                  <span className="w-3.5 h-3.5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                  Loading pending records...
+                </div>
+              )}
+              {isLoadingMore && (
+                <div className="flex items-center justify-center gap-2 px-6 py-3 text-xs text-gray-500">
+                  <span className="w-3.5 h-3.5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                  Loading more pending records...
+              </div>
+            )}
+            {!isLoadingMore && !pendingHasMore && pendingData.length > 0 && (
+              <div className="px-6 py-3 text-center text-xs text-gray-500">All pending records loaded</div>
+            )}
           </div>
-        )}
+        </div>
+      )}
 
         {/* History Tab Content */}
         {activeTab === 'history' && (
@@ -594,12 +645,13 @@ export function PaymentView() {
               <h3 className="text-lg font-semibold">Payment History</h3>
               <p className="text-gray-600 text-sm">
                 {customerFilter ? `Filtered by: ${customerFilter}` : searchTerm ? `Search results for: "${searchTerm}"` : 'Processed payments'}
-                {customerFilter || searchTerm ? ` (${historyData.length} records)` : ''}
+                {customerFilter || searchTerm ? ` (${displayedHistoryCount} records)` : ''}
               </p>
             </div>
             <div
               className="overflow-x-auto relative"
               style={{ maxHeight: '500px', overflowY: 'auto' }}
+              onScroll={(e) => handleScroll(e, 'history')}
             >
               <table className="w-full table-auto text-sm">
                 <thead className="bg-gray-50 border-b sticky top-0 z-10 shadow-sm text-xs">
@@ -649,9 +701,24 @@ export function PaymentView() {
                   )}
                 </tbody>
               </table>
-            </div>
+              {isHistoryTabLoading && (
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-white/80 text-xs font-medium text-gray-600">
+                  <span className="w-3.5 h-3.5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                  Loading history records...
+                </div>
+              )}
+              {isLoadingMore && (
+                <div className="flex items-center justify-center gap-2 px-6 py-3 text-xs text-gray-500">
+                  <span className="w-3.5 h-3.5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                  Loading more history records...
+              </div>
+            )}
+            {!isLoadingMore && !historyHasMore && historyData.length > 0 && (
+              <div className="px-6 py-3 text-center text-xs text-gray-500">All history records loaded</div>
+            )}
           </div>
-        )}
+        </div>
+      )}
       </div>
 
       {/* Dialog Modal */}
