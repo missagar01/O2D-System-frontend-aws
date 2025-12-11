@@ -8,6 +8,7 @@ export function PaymentView() {
   const [allCustomers, setAllCustomers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [loadingTab, setLoadingTab] = useState<'pending' | 'history' | null>(null)
   const [activeTab, setActiveTab] = useState('pending')
   const [selectedEntry, setSelectedEntry] = useState(null)
   const [paymentStatus, setPaymentStatus] = useState("")
@@ -35,8 +36,8 @@ export function PaymentView() {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const displayedPendingCount = pendingTotalCount ?? pendingData.length
   const displayedHistoryCount = historyTotalCount ?? historyData.length
-  const isPendingTabLoading = loading && activeTab === 'pending' && pendingData.length === 0
-  const isHistoryTabLoading = loading && activeTab === 'history' && historyData.length === 0
+  const isPendingTabLoading = loadingTab === 'pending' && activeTab === 'pending'
+  const isHistoryTabLoading = loadingTab === 'history' && activeTab === 'history'
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -116,7 +117,7 @@ export function PaymentView() {
     const isPendingTab = tab === 'pending'
 
     if (!shouldReset) {
-      if (loading || isLoadingMore) {
+      if (isLoadingMore || loadingTab !== null) {
         return
       }
 
@@ -140,6 +141,7 @@ export function PaymentView() {
 
     if (shouldReset) {
       setLoading(true)
+      setLoadingTab(tab)
     } else {
       setIsLoadingMore(true)
     }
@@ -220,6 +222,7 @@ export function PaymentView() {
     } finally {
       if (shouldReset) {
         setLoading(false)
+        setLoadingTab(prev => (prev === tab ? null : prev))
       }
       setIsLoadingMore(false)
     }
